@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 嵌入html
     const iFrame = document.createElement("iframe");
-    iFrame.src  = chrome.extension.getURL ("iframe-note-jquery/index.html");
+    // iFrame.src  = chrome.extension.getURL ("iframe-note-jquery/index.html");
+    iFrame.src  = chrome.extension.getURL ("iframe-note-vue3/index.html");
     document.body.insertBefore(iFrame, document.body.firstChild);
 
     // 从页面拿数据
