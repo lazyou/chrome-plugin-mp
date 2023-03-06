@@ -13,8 +13,17 @@
         <title>Element Plus demo</title>
     </head>
     <body>
-        <div id="app">
-            <el-button>xxx</el-button>
+        <div id="vue-app">
+<!--            <el-button @click="textToggle" size="small">Note</el-button>-->
+
+            <el-input
+                v-show="textStatus"
+                v-model="text"
+                @input="textChange"
+                :rows="10"
+                type="textarea"
+                placeholder=""
+            />
         </div>
     </body>
 </html>
