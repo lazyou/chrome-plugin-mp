@@ -1,36 +1,41 @@
-<!DOCTYPE html>
 <html>
-<head>
-    <title>Note</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-</head>
+    <head>
+        <title>Note</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    </head>
 
-<style>
-    body {
-        width: 200px;min-height:100px; text-align: center;
-    }
+    <style>
+        body {
+            width: 500px;
+            height: 150px;
+            max-height: 200px;
+        }
+    </style>
 
-    button {
-        background-color: #409eff;
-        border-color: #409eff;
-        padding: 6px 10px;
-        font-size: 14px;
-        border-radius: 4px;
-        border: 1px solid #DCDFE6;
-    }
-</style>
-<body>
-    <div style="padding: 10px;">
-        <button id="click_by_id">
-            点击测试
-        </button>
-    </div>
-
-    <div style="padding: 10px;">
-        <span>请勿点击 "退出登录"!</span>
-    </div>
+    <body>
+        <div id="vue-app">
+            <el-input
+                v-show="textStatus"
+                v-model="text"
+                @input="textChange"
+                :autosize="{ minRows: 7, maxRows: 15}"
+                type="textarea"
+                placeholder=""
+            />
+        </div>
+    </body>
 
     <script type="text/javascript" src="js/lib/jquery-1.8.3.js"></script>
     <script type="text/javascript" src="js/popup.js"></script>
-</body>
+
+    <link type="text/css" rel="stylesheet" href="js/vue/element-plus@2.2.25.css">
+    <script type="text/javascript" src="js/vue/vue@3.2.45-dev.js"></script>
+    <script type="text/javascript" src="js/vue/element-plus@2.2.25.js"></script>
+    <script type="text/javascript" src="js/vue/element-plus-icons@2.0.10.js"></script>
+    <script type="text/javascript" src="js/vue/element-plus@2.2.25-zh-cn.js"></script>
+    <script type="text/javascript" src="js/vue/axios@1.1.2.min.js"></script>
+    <script type="text/javascript" src="js/vue/axios-util.js"></script>
+    <script type="text/javascript" src="js/vue_index.js"></script>
+    <script type="text/javascript" src="js/chrome.js"></script>
 </html>
