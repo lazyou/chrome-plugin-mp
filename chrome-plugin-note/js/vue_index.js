@@ -46,13 +46,13 @@ window.onload = function() {
             },
             // 根据当前tab url，将 笔记缓存 存入 storage 里
             textSave() {
-                if (this.text) {
-                    chrome.storage.sync.set(this.getStorageObj(), function() {
-                        console.log('textSave: 保存成功！')
-                    })
-                } else {
-                    console.log('textSave: text 为空，不保存')
-                }
+                // if (this.text) {
+                chrome.storage.sync.set(this.getStorageObj(), function() {
+                    console.log('textSave: 保存成功！')
+                })
+                // } else {
+                //     console.log('textSave: text 为空，不保存')
+                // }
             },
             textToggle() {
                 this.textStatus = !this.textStatus;
