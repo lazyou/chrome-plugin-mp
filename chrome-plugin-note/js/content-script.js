@@ -10,33 +10,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const iFrame = document.createElement("iframe");
     iFrame.id = "vue-iframe";
     iFrame.style= `
-        height: auto; 
-        width: auto; 
-        min-height: 20px; 
-        min-width: 80px;
+        height: 300px; 
+        width: 300px;
         position: fixed;
         z-index: 99999;
         right: 0;
-        border-bottom-left-radius: 4px;
-        border-bottom-right-radius: 4px;
-        border-top-left-radius: 4px;
-        border-top-right-radius: 4px;
+        border-radius: 4px;
+        border: 1px solid black;
+        resize: vertical;
+        overflow: auto;
     `;
     iFrame.src  = chrome.extension.getURL ("iframe-note-vue3/index.html");
     // iFrame.src  = chrome.extension.getURL ("iframe-note-jquery/index.html");
     document.body.insertBefore(iFrame, document.body.firstChild);
 
-    // 从页面拿数据
-    let url = $('#_url').val();
-    let cookiesStr = $('#_cookies').val();
-    if (url && cookiesStr) {
-        let cookies = JSON.parse(cookiesStr);
-        chrome.runtime.sendMessage({cookies: cookies, redirectURL: url}, (response) => {
-            console.log('reciver background.js：');
-            console.log(response);
-        });
-    } else {
-        console.log('no cookies');
-    }
+
+    // // 从页面拿数据
+    // let url = $('#_url').val();
+    // let cookiesStr = $('#_cookies').val();
+    // if (url && cookiesStr) {
+    //     let cookies = JSON.parse(cookiesStr);
+    //     chrome.runtime.sendMessage({cookies: cookies, redirectURL: url}, (response) => {
+    //         console.log('reciver background.js：');
+    //         console.log(response);
+    //     });
+    // } else {
+    //     console.log('no cookies');
+    // }
 });
 

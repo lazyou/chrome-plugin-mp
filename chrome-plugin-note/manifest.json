@@ -31,7 +31,9 @@
   },
   "permissions":[
     "tabs",
+    "contextMenus",
     "cookies",
+    "storage",
     "http://*/*",
     "https://*/*"
   ]
