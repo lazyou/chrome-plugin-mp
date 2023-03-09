@@ -19,9 +19,9 @@ function executeScriptToCurrentTab(code)
 	});
 }
 
-// 监听插件的时间
-document.getElementById('click_by_id').addEventListener('click', () => {
-    executeScriptToCurrentTab(`
-        console.log('executeScriptToCurrentTab click_by_id');
-    `);
-});
+// // 监听插件的事件
+// document.getElementById('click_by_id').addEventListener('click', () => {
+//     executeScriptToCurrentTab(`
+//         console.log('executeScriptToCurrentTab click_by_id');
+//     `);
+// });

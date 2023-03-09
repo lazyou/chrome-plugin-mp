@@ -8,7 +8,7 @@
     <style>
         body {
             width: 500px;
-            height: 150px;
+            height: 200px;
             max-height: 200px;
         }
     </style>
@@ -19,9 +19,11 @@
                 v-show="textStatus"
                 v-model="text"
                 @input="textChange"
-                :autosize="{ minRows: 7, maxRows: 15}"
+                :autofocus="true"
+                :autosize="{ minRows: 10, maxRows: 15}"
                 type="textarea"
                 placeholder="请输入内容"
+                show-word-limit
             />
         </div>
     </body>
