@@ -22,7 +22,6 @@ window.onload = function() {
         methods: {
             init() {
                 console.log('init')
-                createContextMenus()
 
                 // // 在vue执行执行chrome脚本
                 // chrome.tabs.executeScript({
