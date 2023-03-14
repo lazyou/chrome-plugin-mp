@@ -183,7 +183,7 @@ class RewriteNetwork {
                     item.getData[ q[0] ] = decodeURIComponent(q[1]);
                 }
             }
-            if (item.method == 'POST') {
+            if (item.method === 'POST') {
                 // save POST data
                 if (tool.isString(data)) {
                     let arr = data.split('&');
@@ -294,10 +294,25 @@ class RewriteNetwork {
                 return response;
             })
         }
+
         window.fetch = prevFetch;
     }
 
-    filterData({ url,method,req_type,response,getData,postData}){
+    // filterData 支持的参数如下:
+    // {
+    //     costTime: 0,
+    //     endTime: 1678775515422,
+    //     getData: "",
+    //     method: "GET",
+    //     postData: "",
+    //     readyState: 4,
+    //     req_type: "xml",
+    //     response: "{ 请求 api 响应的json字符串 }",
+    //     responseType: "",
+    //     status: 200,
+    //     url: "api/system/user/menus"
+    // }
+    filterData({ url, method, req_type, response, getData, postData}){
         if(!url) return;
         const req_data = {
             url,
@@ -308,7 +323,10 @@ class RewriteNetwork {
             postData
         }
 
+        // TODO: 注意，这里是对【响应】的数据进行监听拦截，而不是对【请求】的数据进行监听拦截
         console.log('拦截的结果01:',req_data)
+
+        forwardTo(req_data)
     }
 
     /**
@@ -326,6 +344,33 @@ class RewriteNetwork {
 }
 
 const network = new RewriteNetwork();
+
+// 转发数据: TODO: 过滤指定 url 才转发数据，避免太多无用数据 。。。等优化
+function forwardTo(req_data) {
+    let postURL = 'http://localhost:8080/v1/fake/report';
+
+    let options = {
+        method: 'POST',
+        body: JSON.stringify(req_data),
+        mode: 'no-cors', // 解决 CORS error 问题. 如果还是不能解决跨域问题，那就要后端nginx添加相关配置 Access-Control-Allow-Origin 之类的
+        headers: {
+            'Content-Type': 'application/json',
+            // 'Authorization':  auth,
+        }
+    }
+
+    fetch(postURL, options)
+        .then(resp => {
+            // console.log("fetch resp:", resp);
+            // console.log("fetch text:", resp.text());
+            // console.log("fetch json:", resp.json());
+            // return resp.json();
+            // return resp.text();
+        })
+        .catch(error=>{
+            console.log("fetch error:", error);
+        })
+}
 
 // // 【通信: 注入页面的 js -> install.js】
 // // 利用postMessage方法和content_script进行通信、在拦截请求的方法里面去发送数据给content_script

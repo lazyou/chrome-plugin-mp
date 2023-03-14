@@ -3,6 +3,7 @@
   "description": "chrome插件",
   "version": "1.0",
   "manifest_version": 2,
+//  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   // 你可以理解为你的插件注入在浏览器的一个后台服务器
   "background": {
     "page": "/background/index.html"
