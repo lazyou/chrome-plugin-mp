@@ -2,7 +2,7 @@ console.log('contentScript/network.js');
 
 const tool = {
     isString(value) {
-        return Object.prototype.toString.call(value) == '[object String]';
+        return Object.prototype.toString.call(value) === '[object String]';
     },
     isPlainObject(obj) {
         let hasOwn = Object.prototype.hasOwnProperty;
@@ -50,8 +50,7 @@ class RewriteNetwork {
      * @private
      */
     mockAjax() {
-        let _XMLHttpRequest = window.XMLHttpRequest;
-        if (!_XMLHttpRequest) { return; }
+        if (!window.XMLHttpRequest) { return; }
         const that = this;
         //保存原生_XMLHttpRequest方法、用于下方重写
         const _open = window.XMLHttpRequest.prototype.open,
@@ -89,17 +88,17 @@ class RewriteNetwork {
                 }
                 item.responseType = XMLReq.responseType;
                 //初始化状态。XMLHttpRequest 对象已创建或已被 abort() 方法重置。
-                if (XMLReq.readyState == 0) {
+                if (XMLReq.readyState === 0) {
                     if (!item.startTime) {
                         item.startTime = (+new Date());
                     }
                     //open() 方法已调用，但是 send() 方法未调用。请求还没有被发送
-                } else if (XMLReq.readyState == 1) {
+                } else if (XMLReq.readyState === 1) {
                     if (!item.startTime) {
                         item.startTime = (+new Date());
                     }
                     //Send() 方法已调用，HTTP 请求已发送到 Web 服务器。未接收到响应。
-                } else if (XMLReq.readyState == 2) {
+                } else if (XMLReq.readyState === 2) {
                     // HEADERS_RECEIVED
                     item.header = {};
                     let header = XMLReq.getAllResponseHeaders() || '',
@@ -109,23 +108,25 @@ class RewriteNetwork {
                         let line = headerArr[i];
                         if (!line) { continue; }
                         let arr = line.split(': ');
-                        let key = arr[0],
-                            value = arr.slice(1).join(': ');
-                        item.header[key] = value;
+                        let key = arr[0];
+                        item.header[key] = arr.slice(1).join(': ');
                     }
                     //所有响应头部都已经接收到。响应体开始接收但未完成
-                } else if (XMLReq.readyState == 3) {
+                } else if (XMLReq.readyState === 3) {
                     //HTTP 响应已经完全接收。
-                } else if (XMLReq.readyState == 4) {
+                } else if (XMLReq.readyState === 4) {
+                    // console.log('XMLReq:', XMLReq) // 为了 filterData 传入更多所需参数
+
                     clearInterval(timer);
-                    item.endTime = +new Date(),
-                        item.costTime = item.endTime - (item.startTime || item.endTime);
+                    item.endTime = +new Date();
+                    item.costTime = item.endTime - (item.startTime || item.endTime);
                     item.response = XMLReq.response;
                     item.method = XMLReq._method;
-                    item.url = XMLReq._url;
+                    item.url = XMLReq.responseURL;
                     item.req_type = 'xml';
                     item.getData = XMLReq.getData;
                     item.postData = XMLReq.postData;
+
                     that.filterData(item)
                 } else {
                     clearInterval(timer);
@@ -137,7 +138,7 @@ class RewriteNetwork {
             //轮询查询状态
             let preState = -1;
             timer = setInterval(function() {
-                if (preState != XMLReq.readyState) {
+                if (preState !== XMLReq.readyState) {
                     preState = XMLReq.readyState;
                     onreadystatechange.call(XMLReq);
                 }
@@ -215,14 +216,16 @@ class RewriteNetwork {
         if (!_fetch) { return ""; }
         const that = this;
 
-        const prevFetch = function(input, init){
+        window.fetch = function (input, init) {
             let id = that.getUniqueID();
             that.reqList[id] = {};
             let item = that.reqList[id] || {};
+
             let query = [],
                 url = '',
                 method = 'GET',
                 requestHeader = null;
+
             // handle `input` content
             if (tool.isString(input)) { // when `input` is a string
                 method = init.method ? init.method : 'GET';
@@ -250,7 +253,7 @@ class RewriteNetwork {
                 query = query.split('&'); // => ['b=c', 'd=?e']
                 for (let q of query) {
                     q = q.split('=');
-                    item.getData[ q[0] ] = q[1];
+                    item.getData[q[0]] = q[1];
                 }
             }
 
@@ -261,7 +264,7 @@ class RewriteNetwork {
                         item.postData = {};
                         for (let q of arr) {
                             q = q.split('=');
-                            item.postData[ q[0] ] = q[1];
+                            item.postData[q[0]] = q[1];
                         }
                     } else if (tool.isPlainObject(init.body && init.body)) {
                         item.postData = init.body && init.body;
@@ -272,12 +275,16 @@ class RewriteNetwork {
                     item.postData = '[object Object]';
                 }
             }
+
             //   UNSENT
-            if (!item.startTime) {  item.startTime = (+new Date()); }
+            if (!item.startTime) {
+                item.startTime = (+new Date());
+            }
+
             return _fetch(url, init).then((response) => {
                 response.clone().json().then((json) => {
-                    item.endTime = +new Date(),
-                        item.costTime = item.endTime - (item.startTime || item.endTime);
+                    item.endTime = +new Date();
+                    item.costTime = item.endTime - (item.startTime || item.endTime);
                     item.status = response.status;
                     item.header = {};
                     for (let pair of response.headers.entries()) {
@@ -286,16 +293,14 @@ class RewriteNetwork {
                     item.response = json;
                     item.readyState = 4;
                     const contentType = response.headers.get('content-type');
-                    item.responseType  = contentType.includes('application/json') ? 'json' : contentType.includes('text/html') ? 'text' : '';
+                    item.responseType = contentType.includes('application/json') ? 'json' : contentType.includes('text/html') ? 'text' : '';
                     item.req_type = 'fetch';
                     that.filterData(item)
                     return json;
                 })
                 return response;
             })
-        }
-
-        window.fetch = prevFetch;
+        };
     }
 
     // filterData 支持的参数如下:
@@ -324,7 +329,7 @@ class RewriteNetwork {
         }
 
         // TODO: 注意，这里是对【响应】的数据进行监听拦截，而不是对【请求】的数据进行监听拦截
-        console.log('拦截的结果01:',req_data)
+        // console.log('拦截的结果01:',req_data)
 
         forwardTo(req_data)
     }
@@ -335,11 +340,10 @@ class RewriteNetwork {
      * @return string
      */
     getUniqueID() {
-        let id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            let r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
         });
-        return id;
     }
 }
 
