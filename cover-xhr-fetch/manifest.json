@@ -1,0 +1,48 @@
+{
+  "name": "chrome",
+  "description": "chrome插件",
+  "version": "1.0",
+  "manifest_version": 2,
+  // 你可以理解为你的插件注入在浏览器的一个后台服务器
+  "background": {
+    "page": "/background/index.html"
+  },
+  // 插件点击后显示的页面
+  "browser_action": {
+    "default_icon": "/icon/logo.png",
+    "default_title": "chrome插件",
+    "default_popup": "/browser_action/index.html"
+  },
+  // 快捷键打开 browser_action 页面, 也可以浏览器访问 chrome://extensions/shortcuts 自定义
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+Q",
+        "mac": "Alt+Q"
+      }
+    }
+  },
+  // 注入到页面js的规则配置
+  "content_scripts": [
+    {
+      // 定义哪些页面需要注入content script "<all_urls>"所有页面
+      "matches": ["<all_urls>"],
+      // css文件地址
+      "css": [],
+      // 注入的js文件地址
+      "js": ["/contentScript/install.js"],
+      // 控制content script注入的时机。可以是document_start， document_end或者document_idle。默认document_idle。
+      "run_at":"document_start"
+    }
+  ],
+  // 通过 chrome.extension.getURL 来获取包内资源的路径。需要在 manifest.json 文件中【设置访问权限】 web_accessible_resources
+  "web_accessible_resources": [
+    "/contentScript/network.js"
+  ],
+  "icons": {
+    "16": "/icon/logo.png",
+    "32": "/icon/logo.png",
+    "48": "/icon/logo.png",
+    "128": "/icon/logo.png"
+  }
+}
