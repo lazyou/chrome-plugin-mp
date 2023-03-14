@@ -349,8 +349,16 @@ class RewriteNetwork {
 
 const network = new RewriteNetwork();
 
+// 接收端状态
+let canForward = true;
+
 // 转发数据: TODO: 过滤指定 url 才转发数据，避免太多无用数据 。。。等优化
 function forwardTo(req_data) {
+    // 接收端如果出现异常，就不再发送
+    if (! canForward) {
+        return;
+    }
+
     let postURL = 'http://localhost:8080/v1/fake/report';
 
     let options = {
@@ -372,6 +380,7 @@ function forwardTo(req_data) {
             // return resp.text();
         })
         .catch(error=>{
+            canForward = false
             console.log("fetch error:", error);
         })
 }
