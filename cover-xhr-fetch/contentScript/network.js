@@ -1,31 +1,48 @@
 console.log('contentScript/network.js');
 
 
-// 接收端状态
-let canForward = true;
-
-// 转发数据: TODO: 过滤指定 url 才转发数据，避免太多无用数据 。。。等优化
+// TODO: 数据拦截导致网址不能正常访问，所以可以针对要采集网址在插件上设置 "有权访问的网站"
+// 转发数据
 function forwardTo(req_data) {
-    // 接收端如果出现异常，就不再发送
-    if (! canForward) {
+    if (! isURL(req_data.url)) {
         return;
     }
 
-    let allowImport = true;
+    // 允许采集的源网址 与 发送网址 映射.
+    let postDevURL = 'http://localhost:8000/api/douyinProduct/browser_import';
+    let postProdURL = 'https://apisc.qiandouec.com/api/douyinProduct/browser_import';
+    let importMap = [
+        {
+            form: 'http://admin.duowens.test/admin/report/useraidroi/dashboard',
+            to: postDevURL,
+        },
+        {
+            from: 'https://buyin.jinritemai.com/ecom/captain/institution/activity/audit/list',
+            to: postProdURL,
+        }
+    ];
+
+    // 当前网址解析
     let parseURL = new URL(req_data.url);
+    let fromURL = parseURL.origin + parseURL.pathname;
 
-    // allowImport = (
-    //     parseURL.origin === 'https://buyin.jinritemai.com' &&
-    //     parseURL.pathname === '/ecom/captain/institution/activity/audit/list'
-    // );
-    // if (! allowImport) {
-    //     return
-    // }
+    let postURL = '';
+    let allowPost = false;
 
-    console.log('forwardTo 【允许】转发数据:', req_data)
+    // 当前网址解析 是否允许导入
+    for (const index in importMap) {
+        let item = importMap[index];
+        if (item.form === fromURL) {
+            postURL = item.to;
+            allowPost = true;
+        }
+    }
 
-    let postURL = 'http://localhost:8000/api/douyinProduct/browser_import';
-    // let postURL = 'https://apisc.qiandouec.com/api/douyinProduct/browser_import';
+    if (! allowPost) {
+        return;
+    }
+
+    console.log('forwardTo 数据转发:', req_data.method, req_data.url)
 
     const formData = new FormData();
     formData.append('url', req_data.url);
@@ -40,6 +57,8 @@ function forwardTo(req_data) {
         headers: {
             // 'Content-Type': 'application/json',
             // 'Access-Control-Allow-Origin': '*',
+            // TODO: 卧槽，这个 Content-Type 我我没看懂，居然有效果。。。
+            // https://stackoverflow.com/questions/40561738/php-message-warning-missing-boundary-in-multipart-form-data-post-data-in-unknow
             'Content-Type': `Content-type","multipart/form-data; charset=utf-8; boundary=${rand}`, // mode: 'no-cors' 模式下仅支持 multipart/form-data 传参
             // 'Authorization':  auth,
         }
@@ -54,9 +73,13 @@ function forwardTo(req_data) {
             // return resp.text();
         })
         .catch(error=>{
-            // canForward = false
             console.log("fetch error:", error);
         })
+}
+
+function isURL(str) {
+    let v = new RegExp('^(?!mailto:)(?:(?:http|https|ftp)://|//)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?$', 'i');
+    return v.test(str);
 }
 
 const tool = {
