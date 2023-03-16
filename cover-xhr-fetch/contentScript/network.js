@@ -11,32 +11,40 @@ function forwardTo(req_data) {
     // 允许采集的源网址 与 发送网址 映射.
     let postDevURL = 'http://localhost:8000/api/douyinProduct/browser_import';
     let postProdURL = 'https://apisc.qiandouec.com/api/douyinProduct/browser_import';
-    let importMap = [
+    let importArr = [
         {
-            form: 'http://admin.duowens.test/admin/report/useraidroi/dashboard',
+            from: 'https://buyin.jinritemai.com/ecom/captain/institution/activity/audit/list',
+            // to: postProdURL,
             to: postDevURL,
         },
         {
-            from: 'https://buyin.jinritemai.com/ecom/captain/institution/activity/audit/list',
-            to: postProdURL,
+            form: 'http://localhost:8000/admin/douyinCategory',
+            to: postDevURL,
         }
     ];
 
     // 当前网址解析
     let parseURL = new URL(req_data.url);
     let fromURL = parseURL.origin + parseURL.pathname;
+    let allowPost = fromURL === 'https://buyin.jinritemai.com/ecom/captain/institution/activity/audit/list';
 
-    let postURL = '';
-    let allowPost = false;
+    let postURL = postDevURL;
+    // let allowPost = false;
 
-    // 当前网址解析 是否允许导入
-    for (const index in importMap) {
-        let item = importMap[index];
-        if (item.form === fromURL) {
-            postURL = item.to;
-            allowPost = true;
-        }
-    }
+    // console.log('forwardTo 数据转发 1:', req_data.method, req_data.url, fromURL);
+
+    // // 当前网址解析 是否允许导入
+    // for (let idx in importArr) {
+    //     if(!importArr.hasOwnProperty(idx)) continue;
+    //
+    //     let item = importArr[idx];
+    //
+    //     if (item.form === fromURL) {
+    //         postURL = item.to;
+    //         allowPost = true;
+    //         break;
+    //     }
+    // }
 
     if (! allowPost) {
         return;
