@@ -1,5 +1,57 @@
 console.log('contentScript/network.js');
 
+
+// 接收端状态
+let canForward = true;
+
+// 转发数据: TODO: 过滤指定 url 才转发数据，避免太多无用数据 。。。等优化
+function forwardTo(req_data) {
+    // 接收端如果出现异常，就不再发送
+    if (! canForward) {
+        return;
+    }
+
+    let parseURL = new URL(req_data.url);
+    let allowImport = parseURL.origin === 'https://buyin.jinritemai.com' && parseURL.pathname === '/ecom/captain/institution/activity/audit/list';
+    if (! allowImport) {
+        return
+    }
+
+    console.log('forwardTo 【允许】转发数据:', req_data)
+
+    let postURL = 'http://localhost:8000/api/douyinProduct/browser_import';
+    // let postURL = 'https://apisc.qiandouec.com/api/douyinProduct/browser_import';
+
+    const formData = new FormData();
+    formData.append('url', req_data.url);
+    formData.append('data', req_data.response);
+
+    let options = {
+        method: 'post',
+        mode: 'no-cors', // 解决 CORS error 问题. 如果还是不能解决跨域问题，那就要后端nginx添加相关配置 Access-Control-Allow-Origin 之类的
+        body: formData,
+        headers: {
+            'Content-Type': 'multipart/form-data', // mode: 'no-cors' 模式下仅支持 multipart/form-data 传参
+            // 'Content-Type': 'application/json',
+            // 'Content-Type': 'application/json; charset=utf-8',
+            // 'Authorization':  auth,
+        }
+    }
+
+    fetch(postURL, options)
+        .then(resp => {
+            // console.log("fetch resp:", resp);
+            // console.log("fetch text:", resp.text());
+            // console.log("fetch json:", resp.json());
+            // return resp.json();
+            // return resp.text();
+        })
+        .catch(error=>{
+            // canForward = false
+            console.log("fetch error:", error);
+        })
+}
+
 const tool = {
     isString(value) {
         return Object.prototype.toString.call(value) === '[object String]';
@@ -348,42 +400,6 @@ class RewriteNetwork {
 }
 
 const network = new RewriteNetwork();
-
-// 接收端状态
-let canForward = true;
-
-// 转发数据: TODO: 过滤指定 url 才转发数据，避免太多无用数据 。。。等优化
-function forwardTo(req_data) {
-    // 接收端如果出现异常，就不再发送
-    if (! canForward) {
-        return;
-    }
-
-    let postURL = 'http://localhost:8080/v1/fake/report';
-
-    let options = {
-        method: 'POST',
-        body: JSON.stringify(req_data),
-        mode: 'no-cors', // 解决 CORS error 问题. 如果还是不能解决跨域问题，那就要后端nginx添加相关配置 Access-Control-Allow-Origin 之类的
-        headers: {
-            'Content-Type': 'application/json',
-            // 'Authorization':  auth,
-        }
-    }
-
-    fetch(postURL, options)
-        .then(resp => {
-            // console.log("fetch resp:", resp);
-            // console.log("fetch text:", resp.text());
-            // console.log("fetch json:", resp.json());
-            // return resp.json();
-            // return resp.text();
-        })
-        .catch(error=>{
-            canForward = false
-            console.log("fetch error:", error);
-        })
-}
 
 // // 【通信: 注入页面的 js -> install.js】
 // // 利用postMessage方法和content_script进行通信、在拦截请求的方法里面去发送数据给content_script
