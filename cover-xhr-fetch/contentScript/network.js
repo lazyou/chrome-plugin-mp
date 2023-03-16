@@ -11,11 +11,16 @@ function forwardTo(req_data) {
         return;
     }
 
+    let allowImport = true;
     let parseURL = new URL(req_data.url);
-    let allowImport = parseURL.origin === 'https://buyin.jinritemai.com' && parseURL.pathname === '/ecom/captain/institution/activity/audit/list';
-    if (! allowImport) {
-        return
-    }
+
+    // allowImport = (
+    //     parseURL.origin === 'https://buyin.jinritemai.com' &&
+    //     parseURL.pathname === '/ecom/captain/institution/activity/audit/list'
+    // );
+    // if (! allowImport) {
+    //     return
+    // }
 
     console.log('forwardTo 【允许】转发数据:', req_data)
 
@@ -25,15 +30,17 @@ function forwardTo(req_data) {
     const formData = new FormData();
     formData.append('url', req_data.url);
     formData.append('data', req_data.response);
+    let rand = Math.random().toString().substr(2);
 
     let options = {
         method: 'post',
         mode: 'no-cors', // 解决 CORS error 问题. 如果还是不能解决跨域问题，那就要后端nginx添加相关配置 Access-Control-Allow-Origin 之类的
         body: formData,
+        // body: JSON.stringify({ url: req_data.url, data: req_data.response }),
         headers: {
-            'Content-Type': 'multipart/form-data', // mode: 'no-cors' 模式下仅支持 multipart/form-data 传参
             // 'Content-Type': 'application/json',
-            // 'Content-Type': 'application/json; charset=utf-8',
+            // 'Access-Control-Allow-Origin': '*',
+            'Content-Type': `Content-type","multipart/form-data; charset=utf-8; boundary=${rand}`, // mode: 'no-cors' 模式下仅支持 multipart/form-data 传参
             // 'Authorization':  auth,
         }
     }
@@ -59,7 +66,8 @@ const tool = {
     isPlainObject(obj) {
         let hasOwn = Object.prototype.hasOwnProperty;
         // Must be an Object.
-        if (!obj || typeof obj !== 'object' || obj.nodeType || isWindow(obj)) {
+        // if (!obj || typeof obj !== 'object' || obj.nodeType || isWindow(obj)) {
+        if (!obj || typeof obj !== 'object' || obj.nodeType) {
             return false;
         }
         try {
