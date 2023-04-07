@@ -26,9 +26,12 @@ function forwardTo(req_data) {
     // 当前网址解析
     let parseURL = new URL(req_data.url);
     let fromURL = parseURL.origin + parseURL.pathname;
-    let allowPost = fromURL === 'https://buyin.jinritemai.com/ecom/captain/institution/activity/audit/list';
+    // let allowPost = fromURL === 'https://buyin.jinritemai.com/ecom/captain/institution/activity/audit/list'; // 团长
+    let allowPost = fromURL === 'https://fuwu.oceanengine.com/api/v1/order/flist'; // 群峰市场 -- 交易管理 -- 订单管理 https://fuwu.oceanengine.com/service/order
+    // https://fuwu.oceanengine.com/api/v1/order/flist
 
-    let postURL = postDevURL;
+    // let postURL = postDevURL;
+    let postURL = postProdURL;
     // let allowPost = false;
 
     // console.log('forwardTo 数据转发 1:', req_data.method, req_data.url, fromURL);
